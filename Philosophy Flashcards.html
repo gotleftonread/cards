@@ -1,0 +1,376 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Philosophy Flashcards</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one centered study column. Progress and counts on top, a large flip card, controls below. */
+:root {
+  --bg: #eef1f6;
+  --surface: #ffffff;
+  --surface-2: #e3e8f1;
+  --fg: #141b2d;
+  --muted: #5a6479;
+  --line: #cdd5e3;
+  --accent: #2b3a8c;
+  --accent-fg: #ffffff;
+  --good: #1d7a4d;
+  --warn: #b25e09;
+  --font-display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1424; --surface: #1a2138; --surface-2: #252d48; --fg: #e8ecf6; --muted: #9aa5c0;
+    --line: #333d5e; --accent: #9aa9ff; --accent-fg: #0f1424; --good: #5fd09a; --warn: #f0a85a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1424; --surface: #1a2138; --surface-2: #252d48; --fg: #e8ecf6; --muted: #9aa5c0;
+  --line: #333d5e; --accent: #9aa9ff; --accent-fg: #0f1424; --good: #5fd09a; --warn: #f0a85a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 40px;
+}
+.wrap { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+header { display: flex; flex-direction: column; gap: 4px; }
+h1 { font-family: var(--font-display); font-size: clamp(1.6rem, 5vw, 2.2rem); line-height: 1.1; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.sub { color: var(--muted); margin: 0; font-size: 0.95rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: 500 0.78rem var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; padding: 7px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.stats { display: flex; flex-wrap: wrap; gap: 8px 20px; font: 500 0.8rem var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.stats b { color: var(--fg); font-weight: 500; }
+.stats .k b { color: var(--good); } .stats .l b { color: var(--warn); }
+.bar { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; display: flex; }
+.bar i { display: block; height: 100%; }
+.bar .kn { background: var(--good); } .bar .ln { background: var(--warn); }
+.scene { perspective: 1400px; }
+.card { display: grid; width: 100%; min-height: 300px; border: 0; padding: 0; background: none; text-align: left; color: inherit; font: inherit;
+  cursor: pointer; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(.3,.7,.2,1); }
+.card.flipped { transform: rotateY(180deg); }
+.face { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.face.back { transform: rotateY(180deg); border-color: var(--accent); }
+.tag { font: 500 0.72rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 12px; }
+.face.back .tag { color: var(--accent); }
+.body { flex: 1; display: flex; align-items: center; }
+.q { font-family: var(--font-display); font-size: clamp(1.35rem, 4.5vw, 1.9rem); line-height: 1.25; font-weight: 600; margin: 0; text-wrap: balance; }
+.a { font-size: clamp(1.02rem, 3.2vw, 1.2rem); line-height: 1.5; margin: 0; }
+.ex { margin: 0; color: var(--muted); font-size: 0.92rem; border-top: 1px solid var(--line); padding-top: 12px; }
+.hint { font: 500 0.72rem var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.row { display: flex; flex-wrap: wrap; gap: 10px; }
+.row > * { flex: 1 1 140px; }
+button.btn { font: 600 0.95rem var(--font-body); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--fg); cursor: pointer; min-height: 46px; }
+button.btn:hover { border-color: var(--accent); }
+button.btn:disabled { opacity: 0.45; cursor: default; border-color: var(--line); }
+button.learn { border-color: var(--warn); color: var(--warn); }
+button.know { background: var(--good); border-color: var(--good); color: var(--bg); }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.tools .btn { flex: 1 1 110px; min-height: 40px; font-size: 0.85rem; font-weight: 500; }
+.tools .btn[aria-pressed="true"] { background: var(--surface-2); border-color: var(--accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.done { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 28px 24px; display: flex; flex-direction: column; gap: 16px; }
+.done h2 { font-family: var(--font-display); font-size: 1.6rem; margin: 0; }
+.done p { margin: 0; color: var(--muted); }
+.score { font: 500 2.6rem var(--font-mono); }
+.keys { color: var(--muted); font-size: 0.82rem; margin: 0; }
+kbd { font: 500 0.78rem var(--font-mono); background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+.opts { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+button.opt { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; font: 400 0.98rem/1.45 var(--font-body);
+  padding: 14px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+button.opt:hover:not(:disabled) { border-color: var(--accent); }
+button.opt:disabled { cursor: default; }
+button.opt .ltr { font: 500 0.8rem var(--font-mono); color: var(--muted); flex: none; padding-top: 2px; }
+button.opt .res { display: block; font: 500 0.72rem var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 6px; }
+button.opt.correct { border-color: var(--good); border-width: 2px; background: var(--surface-2); }
+button.opt.correct .res { color: var(--good); }
+button.opt.wrong { border-color: var(--warn); border-width: 2px; }
+button.opt.wrong .res { color: var(--warn); }
+button.opt.dim { opacity: 0.6; }
+.fb { margin: 14px 0 0; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); font-size: 0.95rem; }
+.fb strong { display: block; margin-bottom: 4px; }
+.qhead { display: flex; justify-content: space-between; gap: 12px; font: 500 0.8rem var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.qbox { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; margin-top: 10px; }
+.misslist { margin: 0; padding-left: 20px; color: var(--muted); font-size: 0.92rem; }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Philosophy Flashcards</h1>
+    <p class="sub">Arguments, fallacies, arguments for God, and worldview terms.</p>
+  </header>
+
+  <div class="chips" id="modes" role="group" aria-label="Mode">
+    <button class="chip" data-mode="cards" aria-pressed="true">Flashcards</button>
+    <button class="chip" data-mode="quiz" aria-pressed="false">Quiz</button>
+  </div>
+
+  <div class="chips" id="cats" role="group" aria-label="Topic"></div>
+
+  <div id="statwrap">
+    <div class="stats" id="stats"></div>
+    <div class="bar" id="bar" aria-hidden="true"><i class="kn"></i><i class="ln"></i></div>
+  </div>
+
+  <div id="main"></div>
+
+  <div class="tools" id="tools">
+    <button class="btn" id="shuffle">Shuffle</button>
+    <button class="btn" id="restart">Restart</button>
+    <button class="btn" id="missed">Review missed</button>
+    <button class="btn" id="swap" aria-pressed="false">Show answer first</button>
+  </div>
+  <p class="keys" id="keys"><kbd>Space</kbd> flip &nbsp; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> move &nbsp; <kbd>1</kbd> still learning &nbsp; <kbd>2</kbd> got it</p>
+</div>
+
+<script>
+var CARDS = [
+  {c:"Basics", q:"What is philosophy? (textbook definition)", a:"The attempt to think carefully and critically about some of life's most important questions, and the attempt to live out the answers to those questions."},
+  {c:"Reasoning", q:"What is an argument? What are its main parts?", a:"A set of claims, one or more of which is used to provide rational support for some other claim in the set.", x:"Parts: premises (the supporting claims) and a conclusion (the claim being supported). Premise indicators: since, for, because, given. Conclusion indicators: thus, therefore, hence, so."},
+  {c:"Reasoning", q:"When is an argument valid? When is it sound?", a:"Valid: if all the premises are true, then the conclusion must also be true. Sound: the argument has valid logic and only true premises.", x:"If the conclusion could be false even when all the premises are true, the argument is invalid. An argument that lacks valid logic or has one or more false premises is unsound."},
+  {c:"Reasoning", q:"Main difference between deductive reasoning and inductive or abductive reasoning?", a:"Deductive arguments are either valid or invalid, and validity means the conclusion must be true if the premises are. Inductive arguments do not guarantee the truth of their conclusion. At best they make it much more reasonable to believe the conclusion than to deny it.", x:"Abductive reasoning is similar to inductive reasoning, so it does not guarantee its conclusion either."},
+  {c:"Reasoning", q:"Main difference between inductive and abductive reasoning?", a:"Inductive reasoning establishes generalizations (all crows are black) or probabilities about future occurrences (a 40% chance of rain tomorrow). Abductive reasoning (inference to the best explanation) is similar, but seeks to provide an explanatory hypothesis.", x:"Explanations are justified by appeal to theoretical virtues: predictability, simplicity, and fruitfulness for understanding other phenomena."},
+  {c:"Fallacies", q:"What is the red herring fallacy?", a:"Beginning an argument with one topic and supporting the conclusion based on an entirely different topic.", x:"Example: a parent says you are grounded for taking the car and missing curfew. The teenager answers, That's not fair! I'm getting an A in logic class!"},
+  {c:"Fallacies", q:"What is the strawman fallacy?", a:"Attacking a weak or irrelevant version of an opponent's argument."},
+  {c:"Fallacies", q:"What is the genetic fallacy?", a:"Faulting a claim because of its origin rather than considering its merits.", x:"Example: Kirk Cameron says that 2+2 = 4, but I'm skeptical. After all, he is a creationist."},
+  {c:"God arguments", q:"Cosmological argument", a:"God is the best explanation for why the universe exists at all."},
+  {c:"God arguments", q:"State the Kalam cosmological argument in your own words", a:"1. Whatever begins to exist has a cause. 2. The universe began to exist. 3. Therefore, the universe has a cause. That cause, being beyond the universe, is God.", x:"Standard version. Not on your professor's slides, so check your class notes for his wording."},
+  {c:"God arguments", q:"Design argument", a:"God is the best explanation for why certain aspects of the universe are conducive to the existence of living beings. The universe appears to be designed to support life because it really was so designed."},
+  {c:"God arguments", q:"Ontological argument", a:"Reflection on the nature of existence itself indicates that God exists."},
+  {c:"God arguments", q:"Moral argument", a:"God is the best explanation for the existence of objective moral facts/rules."},
+  {c:"God arguments", q:"Noological argument", a:"God's existence is the best explanation for certain facts about the human mind."},
+  {c:"God arguments", q:"Pragmatic argument (extra, on the slides)", a:"The usefulness of belief in God justifies religious belief."},
+  {c:"Collins", q:"According to Robin Collins, which three features of the universe point to a transcendent, intelligent designer? Why?", a:"1. Fine-tuning of the laws, constants, and initial conditions for life. 2. Beauty and elegance of the laws. 3. Intelligibility and discoverability of the laws. Each is surprising or inexplicable if there is no designer, but not surprising if theism is true, so each counts as evidence for theism.", x:"Fine-tuning examples from the slides: expansion rate differing by 1 in 10^53 (242R); initial mass/energy distribution at 1 in 10^123."},
+  {c:"Collins", q:"Explain Collins's likelihood principle in your own words (p. 246L)", a:"An event or state of affairs E counts as evidence for hypothesis H1 over H2 if E is more probable under H1 than under H2. The strength of the support is proportional to the ratio of the two probabilities.", x:"Example: an ink splotch that looks like Lincoln's face supports design, but a random-looking splotch does not. Applied to the universe: its life-permitting features are very improbable on naturalism but not on theism, so they support theism. The probability here is epistemic (degrees of rational expectation), not statistical frequency. Collins also words it as the expectation principle: whatever is more to be expected under H1 than H2 favors H1."},
+  {c:"Draper", q:"What is the fallacy of understated evidence (FUE)?", a:"Using a relatively general, known fact to support a claim when there exists a more specific known fact that fails to support that claim."},
+  {c:"Draper", q:"Why does Draper think Collins committed the fallacy of understated evidence? What fact is Collins overlooking?", a:"Collins uses the general fact of fine-tuning to support theism, but overlooks a more specific fact: humans exist. Draper says human life is very unlikely on theism too, so that fact does not support theism."},
+  {c:"Evil", q:"The psychological problem of evil", a:"The sense of confusion, sadness, and/or outrage that evil causes, along with the life-ruining potential of certain evils."},
+  {c:"Evil", q:"The logical problem of evil", a:"Is it possible that God and evil coexist?"},
+  {c:"Evil", q:"The evidential problem of evil", a:"Does the existence of evil provide good evidence for atheism?"},
+  {c:"Evil", q:"What is the difference between a defense and a theodicy? Explain.", a:"A defense aims to show that atheological arguments from evil do not adequately support atheism. A theodicy aims to provide reasons why a good God would allow evil."},
+  {c:"Evil", q:"State William Rowe's central argument for atheism in your own words", a:"P1: There exist instances of intense suffering which God could have prevented without losing some greater good or permitting some worse evil. P2: God would prevent any intense suffering unless he could not do so without losing some greater good or permitting an equally bad or worse evil. C: God does not exist.", x:"The argument is valid, and theists and non-theists can agree on P2, so the disputed premise is P1. Rowe defends P1 with the fawn burned in a forest fire after a lightning strike: its suffering does not seem tied to any greater good, and God could have prevented it."},
+  {c:"Evil", q:"How does Peter van Inwagen support his belief that it may be morally permissible for God to permit a preventable evil, even if no good comes of it?", a:"With his expanded free-will defense. 1. Humans were originally in relationship with God and could avoid natural evils. 2. When humans broke that relationship, they lost this ability and ruined themselves intellectually and morally. 3. It is a natural consequence of living apart from God that things sometimes happen by chance. 4. If God did not make us aware of this, we would not be motivated to return to him, so for now God has to allow some evil. 5. God can remove some evil, but wherever he draws the line will be arbitrary and some evil will remain. So in some cases it is permissible for God to permit an evil that could have been prevented, even though no good is achieved by doing so.", x:"Builds on the standard free-will defense: God made the world good, free rational beings capable of love are part of that goodness, and God cannot control our freedom or it would not be freedom. Two problems with it: the amount of evil seems too great, and it does not cover natural evils like earthquakes and disease."},
+  {c:"Clifford", q:"Give at least two of W.K. Clifford's reasons for thinking it is wrong always, everywhere, for anyone to believe anything on insufficient evidence", a:"1. Belief is never a private matter. Our beliefs guide our actions and become part of the shared stock of beliefs we pass on to others, so we owe it to humanity to keep them well-founded. 2. Every time we believe for unworthy reasons, we weaken our powers of self-control, doubting, and weighing evidence, and make ourselves credulous. 3. Credulity spreads. A careless attitude toward truth makes others careless too, and a society that loses the habit of testing things sinks back into savagery. 4. Sincerity and being right do not excuse it. What matters is how the belief was acquired, not whether it turned out true.", x:"Shipowner example: he sincerely believed his ship was seaworthy because he stifled his doubts, and he is guilty of the deaths when it sinks. Even if the ship had arrived safely, he would only have been not found out."},
+  {c:"Clifford", q:"What does Peter van Inwagen take to be the double standard in philosophical writing about religious belief, evidence, and argument?", a:"Philosophers who write about religious belief demand that it be held on sufficient evidence or argument, but they do not apply the same standard to their own controversial philosophical, moral, and political beliefs. On those questions, equally intelligent and informed people disagree, and no argument settles the matter. Yet nobody says it is wrong to hold those beliefs. So religious belief is singled out and held to a standard the critics do not meet themselves.", x:"From recall of van Inwagen's essay replying to Clifford, not from your professor's materials. Check it against the textbook."},
+  {c:"Mind", q:"The location problem / the problem of phenomenal consciousness (the location / qualia problem)", a:"Where is the what-it-is-like aspect of consciousness located?", x:"The slides call it the Location / Qualia Problem."},
+  {c:"Mind", q:"The intentionality problem", a:"How can mental states be of or about other things?"},
+  {c:"Mind", q:"The problem of mental causation", a:"How can changes in brain activity cause changes in thought and emotion, and vice versa?"},
+  {c:"Mind", q:"Substance dualism: what does it say about the nature of the mind?", a:"There are two different substances: the brain/body and the soul."},
+  {c:"Mind", q:"Epiphenomenalism: what does it say about the nature of the mind?", a:"A form of property dualism (one kind of substance, two kinds of properties) in which mental properties cannot cause physical events.", x:"Compare emergentism, the other property dualist view, where mental properties can cause physical events. Jackson's version: qualia exist but are causally inert."},
+  {c:"Mind", q:"Functionalism: what does it say about the nature of the mind?", a:"The mind is what the brain does.", x:"Lycan: a mind is a functional entity made up of many parts or mechanisms, which are made up of smaller, simpler ones, down to the brute neural level."},
+  {c:"Mind", q:"Reductionism / identity theory: what does it say about the nature of the mind?", a:"Mental activity just is brain activity."},
+  {c:"Mind", q:"Eliminativism / eliminative materialism: what does it say about the nature of the mind?", a:"There are no mental events, only brain events."},
+  {c:"Mind", q:"Give two pieces of data that J.P. Moreland thinks are best explained by the existence of a spiritual soul", a:"1. Losing body parts, or parts of the brain, does not make someone less of a person. 2. At any given time our thoughts and sensations are unified into a single stream of consciousness, and we know which ones are ours.", x:"Other data from his unification argument: we endure through time, and our thoughts do not float free but are owned and united by some thing, namely me. His claim is that a soul unifies these apparently unrelated items, and they are hard to justify otherwise."},
+  {c:"Mind", q:"State J.P. Moreland's master argument for dualism", a:"P1: I am essentially an indivisible, simple spiritual substance. P2: Any physical body is essentially divisible, extended, and has parts. P3: If A and B are identical, then anything true of A is true of B. Conclusion: I am not identical with my (or any) physical body."},
+  {c:"Mind", q:"State in your own words the view William Lycan calls homuncular functionalism", a:"A mind is a functional entity made up of many separate parts or mechanisms, which are themselves made up of still smaller, simpler parts or mechanisms, and so on down to the brute neural level.", x:"The slides describe this view but do not use the name. Lycan compares it to defining organs by their jobs: heart = blood circulator, kidney = blood filterer, mind = flexible learning device that stores, recalls, and uses biologically relevant information to produce adaptive behavior. Being in pain is just certain activity in the pain module of the mind."},
+  {c:"Mind", q:"What is the absent qualia objection to functionalism?", a:"Other things can reproduce the input/output relations of a brain without producing consciousness. So functionalists cannot account for the what-it-is-like aspect of our mental lives.", x:"Simple version: acting like you feel something is not the same as feeling it. Example: imagine a robot that screams, flinches, and says ouch when you pinch it, exactly like a person would, but feels nothing inside. If that is possible, then a mind cannot be just what the brain does. (The example is mine, not from the slides.) Lycan's responses: a person who believes they are in pain and acts like it is no better off than one who feels pain; and a person shrunk to the size of a molecule inside a brain would not realize that brains produce consciousness, but they do."},
+  {c:"Mind", q:"Explain Frank Jackson's knowledge argument (the Mary example). What is it supposed to show?", a:"Mary lives in a black-and-white world and knows all the physical information about color. When she leaves and sees color for the first time, she learns new facts. Since she already knew all the physical facts, what she learns must be non-physical. It is supposed to show that there is more to the mind than its material properties, so physicalism is false and property dualism is true.", x:"Fred example: even if we knew all the physical information about Fred's behavior and physiology, we would still not know about his color experience. Jackson adds that these non-physical qualia are epiphenomenal: they do not affect what goes on in our brains or bodies."},
+  {c:"Mind", q:"Why doesn't Nagel think we could give a reductionist explanation of the first-person perspective? What would an objective, third-person account leave out?", a:"Facts about what it is like to be an organism, like a bat, can only be known from that organism's own point of view. Materialist explanations try to explain the mind without taking up that first-person perspective, so they leave out what needs explaining, the subjective nature of consciousness. Nagel asks what would be left of what it is like to be a bat if you removed the bat's viewpoint.", x:"Nagel's conclusion: materialism might still be correct, but at present we have no idea how it could be true."},
+  {c:"Mind", q:"State at least two of Patricia Churchland's reasons for thinking consciousness should not be viewed as a uniquely hard problem", a:"1. Beyond prototypical cases like pain and vision, it is unclear that other mental capacities, like proprioception, are qualitative at all. 2. There is no direct empirical evidence that the hard problem is any harder than other things about the mind we cannot yet explain. 3. How the nervous system works is currently mysterious, but that is a fact about us and our current science, not about the nervous system itself.", x:"Her conclusion: we should learn science, do science, and see what happens."},
+  {c:"Worldviews", q:"Theism", a:"Belief in a caring, personal God.", x:"Monotheism: one God. Polytheism: many personal Gods."},
+  {c:"Worldviews", q:"Deism", a:"Belief that God does not care about creation/humanity."},
+  {c:"Worldviews", q:"Atheism", a:"Belief that there is no God."},
+  {c:"Worldviews", q:"Agnosticism", a:"The belief that God's existence (if God exists) is unknown or unknowable."},
+  {c:"Worldviews", q:"Pantheism", a:"God is entirely immanent in the universe.", x:"Compare panentheism: God is immanent and partly transcendent."}
+];
+CARDS.forEach(function(c, i) { c.id = i; });
+var CATS = ["All"].concat(CARDS.map(function(c){return c.c;}).filter(function(v,i,a){return a.indexOf(v)===i;}));
+
+var st = { cat: "All", deck: [], pos: 0, flipped: false, marks: {}, swap: false, finished: false, missedMode: false, mode: "cards" };
+var qz = { items: [], i: 0, picked: null, score: 0, missed: [], done: false };
+
+function $(id) { return document.getElementById(id); }
+function esc(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+function inCat() { return CARDS.filter(function(c){ return st.cat === "All" || c.c === st.cat; }).map(function(c){return c.id;}); }
+function buildDeck() { st.deck = inCat(); st.pos = 0; st.flipped = false; st.finished = false; st.missedMode = false; }
+function shuffleArr(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function count(kind) { return st.deck.filter(function(id){ return st.marks[id] === kind; }).length; }
+
+function renderCats() {
+  $("cats").innerHTML = CATS.map(function(c) {
+    return '<button class="chip" data-cat="' + esc(c) + '" aria-pressed="' + (c === st.cat) + '">' + esc(c) + '</button>';
+  }).join("");
+}
+
+function render() {
+  if (st.mode === "quiz") { renderQuiz(); return; }
+  var n = st.deck.length, k = count("known"), l = count("learning");
+  $("stats").innerHTML = '<span>Card <b>' + (n ? Math.min(st.pos + 1, n) : 0) + '/' + n + '</b></span>' +
+    '<span class="k">Got it <b>' + k + '</b></span><span class="l">Still learning <b>' + l + '</b></span>' +
+    (st.missedMode ? '<span>Missed-card review</span>' : '');
+  var bar = $("bar");
+  bar.children[0].style.width = (n ? k / n * 100 : 0) + "%";
+  bar.children[1].style.width = (n ? l / n * 100 : 0) + "%";
+  $("swap").setAttribute("aria-pressed", String(st.swap));
+  $("missed").disabled = Object.keys(st.marks).filter(function(id){ return st.marks[id] === "learning"; }).length === 0;
+
+  var main = $("main");
+  if (st.finished) {
+    var total = st.deck.length, missed = l;
+    main.innerHTML = '<div class="done"><div class="hint">Deck finished</div><div class="score">' + k + '/' + total + '</div>' +
+      '<h2>' + (missed === 0 ? "You got every card." : missed + (missed === 1 ? " card" : " cards") + " left to learn.") + '</h2>' +
+      '<p>' + (missed === 0 ? "Restart to go through the deck again." : "Review only the cards you missed, or restart the whole deck.") + '</p>' +
+      '<div class="row"><button class="btn primary" id="d-missed"' + (missed ? "" : " disabled") + '>Review missed</button><button class="btn" id="d-restart">Restart</button></div></div>';
+    $("d-restart").onclick = restart;
+    $("d-missed").onclick = reviewMissed;
+    return;
+  }
+  var card = CARDS[st.deck[st.pos]];
+  var front = st.swap ? card.a : card.q, back = st.swap ? card.q : card.a;
+  var fCls = st.swap ? "a" : "q", bCls = st.swap ? "q" : "a";
+  var extra = card.x ? '<p class="ex">' + esc(card.x) + '</p>' : "";
+  main.innerHTML =
+    '<div class="scene"><button class="card' + (st.flipped ? " flipped" : "") + '" id="card" aria-label="Flashcard. Press to flip.">' +
+      '<div class="face front"><div class="tag"><span>' + (st.swap ? "Answer" : "Question") + '</span><span>' + esc(card.c) + '</span></div>' +
+        '<div class="body"><p class="' + fCls + '">' + esc(front) + '</p></div><div class="hint">Tap to flip</div></div>' +
+      '<div class="face back"><div class="tag"><span>' + (st.swap ? "Question" : "Answer") + '</span><span>' + esc(card.c) + '</span></div>' +
+        '<div class="body"><p class="' + bCls + '">' + esc(back) + '</p></div>' + extra + '</div>' +
+    '</button></div>' +
+    '<div class="row" style="margin-top:14px">' +
+      '<button class="btn learn" id="b-learn">Still learning</button>' +
+      '<button class="btn know" id="b-know">Got it</button></div>' +
+    '<div class="row" style="margin-top:10px">' +
+      '<button class="btn" id="b-prev"' + (st.pos === 0 ? " disabled" : "") + '>Back</button>' +
+      '<button class="btn" id="b-next"' + (st.pos >= n - 1 ? " disabled" : "") + '>Skip</button></div>';
+  $("card").onclick = flip;
+  $("b-learn").onclick = function() { rate("learning"); };
+  $("b-know").onclick = function() { rate("known"); };
+  $("b-prev").onclick = function() { go(-1); };
+  $("b-next").onclick = function() { go(1); };
+}
+
+function flip() { if (st.finished) return; st.flipped = !st.flipped; var c = $("card"); if (c) c.classList.toggle("flipped", st.flipped); }
+function go(d) { var p = st.pos + d; if (p < 0 || p >= st.deck.length) return; st.pos = p; st.flipped = false; render(); }
+function rate(kind) {
+  if (st.finished) return;
+  st.marks[st.deck[st.pos]] = kind;
+  if (st.pos >= st.deck.length - 1) { st.finished = true; st.flipped = false; }
+  else { st.pos++; st.flipped = false; }
+  render();
+}
+function restart() { inCat().forEach(function(id){ delete st.marks[id]; }); buildDeck(); render(); }
+function shuffle() { shuffleArr(st.deck); st.pos = 0; st.flipped = false; st.finished = false; render(); }
+function reviewMissed() {
+  var ids = inCat().filter(function(id){ return st.marks[id] === "learning"; });
+  if (!ids.length) return;
+  ids.forEach(function(id){ delete st.marks[id]; });
+  st.deck = ids; st.pos = 0; st.flipped = false; st.finished = false; st.missedMode = true; render();
+}
+
+$("cats").addEventListener("click", function(e) {
+  var b = e.target.closest("[data-cat]"); if (!b) return;
+  st.cat = b.getAttribute("data-cat"); buildDeck(); renderCats(); if (st.mode === "quiz") startQuiz(); else render();
+});
+$("shuffle").onclick = shuffle;
+$("restart").onclick = restart;
+$("missed").onclick = reviewMissed;
+$("swap").onclick = function() { st.swap = !st.swap; st.flipped = false; render(); };
+document.addEventListener("keydown", function(e) {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  var t = e.target && e.target.tagName;
+  if (st.mode === "quiz") {
+    if (e.key === " " && t === "BUTTON") return;
+    if (!qz.done && qz.picked === null && e.key >= "1" && e.key <= "4") pick(Number(e.key) - 1);
+    else if ((e.key === "Enter" || e.key === "ArrowRight") && t !== "BUTTON") nextQ();
+    return;
+  }
+  if (e.key === " " && t === "BUTTON") return;
+  if (e.key === " ") { e.preventDefault(); flip(); }
+  else if (e.key === "ArrowRight") go(1);
+  else if (e.key === "ArrowLeft") go(-1);
+  else if (e.key === "1") rate("learning");
+  else if (e.key === "2") rate("known");
+});
+
+function startQuiz(ids) {
+  var list = shuffleArr((ids || inCat()).slice());
+  qz.items = list.map(function(id) {
+    var card = CARDS[id];
+    var same = shuffleArr(CARDS.filter(function(c) { return c.id !== id && c.c === card.c; }));
+    var other = shuffleArr(CARDS.filter(function(c) { return c.id !== id && c.c !== card.c; }));
+    var wrong = same.concat(other).slice(0, 3).map(function(c) { return c.a; });
+    return { id: id, correct: card.a, opts: shuffleArr(wrong.concat([card.a])) };
+  });
+  qz.i = 0; qz.picked = null; qz.score = 0; qz.missed = []; qz.done = false;
+  renderQuiz();
+}
+function pick(k) {
+  if (qz.picked !== null || qz.done) return;
+  var item = qz.items[qz.i];
+  if (k < 0 || k >= item.opts.length) return;
+  qz.picked = k;
+  if (item.opts[k] === item.correct) qz.score++; else qz.missed.push(item.id);
+  renderQuiz();
+}
+function nextQ() {
+  if (qz.picked === null || qz.done) return;
+  if (qz.i >= qz.items.length - 1) qz.done = true; else { qz.i++; qz.picked = null; }
+  renderQuiz();
+}
+function renderQuiz() {
+  var main = $("main"), n = qz.items.length;
+  if (qz.done) {
+    var pct = Math.round(qz.score / n * 100), m = qz.missed.length;
+    main.innerHTML = '<div class="done"><div class="hint">Quiz finished</div><div class="score">' + qz.score + '/' + n + '</div>' +
+      '<h2>' + pct + '% correct</h2>' +
+      (m ? '<p>Missed:</p><ul class="misslist">' + qz.missed.map(function(id) { return '<li>' + esc(CARDS[id].q) + '</li>'; }).join("") + '</ul>' : '<p>You got every question right.</p>') +
+      '<div class="row"><button class="btn primary" id="q-retake">Retake quiz (reshuffled)</button>' +
+      '<button class="btn" id="q-missed"' + (m ? "" : " disabled") + '>Retry missed only</button>' +
+      '<button class="btn" id="q-study">Study as flashcards</button></div></div>';
+    $("q-retake").onclick = function() { startQuiz(); };
+    $("q-missed").onclick = function() { startQuiz(qz.missed.slice()); };
+    $("q-study").onclick = function() { setMode("cards"); };
+    return;
+  }
+  var item = qz.items[qz.i], card = CARDS[item.id], answered = qz.picked !== null;
+  var opts = item.opts.map(function(o, k) {
+    var cls = "opt", res = "";
+    if (answered) {
+      if (o === item.correct) { cls += " correct"; res = '<span class="res">' + (k === qz.picked ? "Your answer: correct" : "Correct answer") + '</span>'; }
+      else if (k === qz.picked) { cls += " wrong"; res = '<span class="res">Your answer</span>'; }
+      else cls += " dim";
+    }
+    return '<button class="' + cls + '" data-k="' + k + '"' + (answered ? " disabled" : "") + '><span class="ltr">' + "ABCD".charAt(k) + '</span><span>' + esc(o) + res + '</span></button>';
+  }).join("");
+  var fb = "";
+  if (answered) {
+    var ok = item.opts[qz.picked] === item.correct;
+    fb = '<div class="fb"><strong>' + (ok ? "Correct." : "Not quite. The right answer is highlighted.") + '</strong>' + (card.x ? esc(card.x) : "") + '</div>' +
+      '<div class="row" style="margin-top:14px"><button class="btn primary" id="q-next">' + (qz.i >= n - 1 ? "See results" : "Next question") + '</button></div>';
+  }
+  main.innerHTML = '<div class="qhead"><span>Question ' + (qz.i + 1) + '/' + n + '</span><span>Score ' + qz.score + '</span></div>' +
+    '<div class="bar" aria-hidden="true" style="margin-top:8px"><i class="kn" style="width:' + (qz.i / n * 100) + '%"></i></div>' +
+    '<div class="qbox"><div class="tag"><span>Choose the answer</span><span>' + esc(card.c) + '</span></div>' +
+    '<p class="q" style="margin-top:12px">' + esc(card.q) + '</p>' +
+    '<div class="opts">' + opts + '</div>' + fb + '</div>' +
+    (answered ? "" : '<p class="keys" style="margin-top:10px">Press <kbd>1</kbd> to <kbd>4</kbd> to answer.</p>');
+  Array.prototype.forEach.call(main.querySelectorAll(".opt"), function(b) { b.onclick = function() { pick(Number(b.getAttribute("data-k"))); }; });
+  var nb = $("q-next"); if (nb) nb.onclick = nextQ;
+}
+function setMode(m) {
+  st.mode = m;
+  var q = m === "quiz";
+  $("statwrap").hidden = q; $("tools").hidden = q; $("keys").hidden = q;
+  Array.prototype.forEach.call($("modes").querySelectorAll("[data-mode]"), function(b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-mode") === m)); });
+  if (q) startQuiz(); else render();
+}
+$("modes").addEventListener("click", function(e) {
+  var b = e.target.closest("[data-mode]"); if (!b) return;
+  setMode(b.getAttribute("data-mode"));
+});
+
+buildDeck(); renderCats(); render();
+</script>
+
+</body></html>
